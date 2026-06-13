@@ -104,13 +104,13 @@ def float(id: int):
     send({"Action": {
             "MoveFloatingWindow": {
                 "id": id,
-                "x": {"SetFixed": 1360.0},
-                "y": {"SetFixed": 100.0}
+                "x": {"SetProportion": 70.0},
+                "y": {"SetProportion": 10.0}
             }
         }
     })
-    send({"Action": {"SetWindowWidth": {"id": id, "change": {"SetFixed": 450}}}})
-    send({"Action": {"SetWindowHeight": {"id": id, "change": {"SetFixed": 670}}}})
+    send({"Action": {"SetWindowWidth": {"id": id, "change": {"SetProportion": 10.0}}}})
+    send({"Action": {"SetWindowHeight": {"id": id, "change": {"SetProportion": 55.0}}}})
 
 
 def update_matched(win):
