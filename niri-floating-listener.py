@@ -109,8 +109,20 @@ def float(id: int):
             }
         }
     })
-    send({"Action": {"SetWindowWidth": {"id": id, "change": {"SetProportion": 10.0}}}})
-    send({"Action": {"SetWindowHeight": {"id": id, "change": {"SetProportion": 55.0}}}})
+    send({"Action": {
+            "SetWindowWidth": {
+                "id": id,
+                "change": { "SetProportion": 20.0 }
+            }
+        }
+    })
+    send({"Action": {
+            "SetWindowHeight": {
+                "id": id,
+                "change": { "SetProportion": 55.0 }
+            }
+        }
+    })
 
 
 def update_matched(win):
