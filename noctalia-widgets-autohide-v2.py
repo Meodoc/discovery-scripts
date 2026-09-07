@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 """Hide Noctalia desktop widgets while a tiled (non-floating) window is on an
-active niri workspace; show them when only floating windows remain.
+active niri workspace belonging to a monitor listed in WIDGET_OUTPUTS.
 
-Tracks workspace/window state from the niri event stream, so a decision needs
-no IPC round-trips -- only an actual visibility flip spawns anything.
+Windows on any other monitor are ignored, so an external display does not hide
+the widgets on the laptop panel.
+
+Note: noctalia's desktop-widgets-show/hide IPC commands are global -- they take
+no monitor selector -- so if WIDGET_OUTPUTS lists several outputs, a window on
+any one of them hides the widgets on all of them. That is a shell limitation,
+not a bug here.
 """
 
 import json
 import subprocess
 import sys
+
+# Connector names of the monitors your desktop widgets sit on.
+# Find yours with: niri msg outputs
+# An empty set means "every output" (the previous behavior).
+WIDGET_OUTPUTS = {"eDP-1"}
 
 windows = {}      # window id -> (workspace id, is_floating)
 ws_output = {}    # workspace id -> output name
@@ -16,10 +26,17 @@ active_ws = set() # workspace ids currently active on some output
 state = None
 
 
+def counts(ws, floating):
+    """True when this window should force the widgets hidden."""
+    if floating or ws not in active_ws:
+        return False
+    if not WIDGET_OUTPUTS:
+        return True
+    return ws_output.get(ws) in WIDGET_OUTPUTS
+
+
 def occupied():
-    """True when a tiled window sits on a workspace active on some output."""
-    return any(ws in active_ws and not floating
-               for ws, floating in windows.values())
+    return any(counts(ws, floating) for ws, floating in windows.values())
 
 
 def apply():
@@ -64,8 +81,8 @@ def handle(name, data):
             remember(w)
 
     elif name == "WindowOpenedOrChanged":
-        # Also fires when a window is toggled floating/tiled, so this keeps
-        # is_floating current without any extra event handling.
+        # Also fires when a window is toggled floating/tiled or moved to
+        # another workspace, so this keeps both fields current.
         remember(data["window"])
 
     elif name == "WindowClosed":
