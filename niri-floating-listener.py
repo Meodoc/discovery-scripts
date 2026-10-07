@@ -27,9 +27,9 @@ class Match:
         matched = True
 
         if self.title is not None:
-            matched &= re.search(self.title, window["title"]) is not None
+            matched &= re.search(self.title, window["title"] or "") is not None
         if self.app_id is not None:
-            matched &= re.search(self.app_id, window["app_id"]) is not None
+            matched &= re.search(self.app_id, window["app_id"] or "") is not None
 
         return matched
 
